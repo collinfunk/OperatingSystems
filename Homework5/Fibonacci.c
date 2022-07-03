@@ -10,15 +10,12 @@ void *runner (void *param);
 int main(int argc, char *argv[]) {
     int num_of_args = argc-1;
     pthread_t *tid;
-    pthread_attr_t attr;
     
-    //if not 2 arguements print ("Error: Enter in format ./Fibonacci (Integer representating how many Fibonacci numbers to print)")
     if (argc != 2) {
         printf("Error: Enter in format ./Fibonacci (Integer representating how many Fibonacci numbers to print)\n");
         exit(1);
     }
 
-    // if atoi fails print ("Error: Enter in format ./Fibonacci (Integer representating how many Fibonacci numbers to print)")
     int num = atoi(argv[1]);
     if (num < 0) {
         printf("Input must be an integer greater than 0\n");
@@ -28,17 +25,14 @@ int main(int argc, char *argv[]) {
     fibSequence = malloc(num * sizeof(int));
     tid = (pthread_t *)malloc(num * sizeof(pthread_t));
 
-    //create threads
     for (int i = 0; i < num; i++) {
         pthread_create(&tid[i], 0, runner, (void *)i);
     }
 
-    //join threads
     for (int i = 0; i < num; i++) {
         pthread_join(tid[i], NULL);
     }
 
-    //print fibSequence
     for (int i = 0; i < num; i++) {
         printf("%d\n", fibSequence[i]);
     }
