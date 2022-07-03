@@ -8,7 +8,7 @@ int *fibSequence;
 void *runner (void *param);
 
 int main(int argc, char *argv[]) {
-    int num_of_args = argc-1;
+    int num_of_args = argc - 1;
     pthread_t *tid;
     
     if (argc != 2) {
