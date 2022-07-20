@@ -9,7 +9,7 @@ void *producer (void *param) {
     while (1) {
         int sleepTime = rand() % 5;
         sleep(sleepTime);
-        item = rand();
+        item = rand() % 100 + 1; // Generate a random number between 1 and 100
         if (insert_item(item)) {
             printf("Error placing into buffer\n");
         } else {

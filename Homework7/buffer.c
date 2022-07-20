@@ -14,13 +14,13 @@ int insertPos = 0, removePos = 0;
 
 int insert_item(buffer_item item) {
     int returnVal = 0;
-    sem_wait(&empty);
+    sem_wait(&full); // Wait until there is space in the buffer
     pthread_mutex_lock(&mutex);
-
     if (insertPos < BUFFER_SIZE) {
         buffer[insertPos++] = item;
         insertPos %= BUFFER_SIZE;
     } else {
+        printf("Error: Buffer is full\n");
         returnVal = -1;
     }
 
@@ -41,13 +41,13 @@ int remove_item(buffer_item *item) {
     }
 
     pthread_mutex_unlock(&mutex);
-    sem_post(&empty);
+    sem_post(&full); // Signal that there is space in the buffer
     return returnVal;
 }
 
 int initialize_buffer() {
-    sem_init(&empty, 0, BUFFER_SIZE - 1);
-    sem_init(&full, 0, 0);
+    sem_init(&empty, 0, 0);
+    sem_init(&full, 0, BUFFER_SIZE);
     pthread_mutex_init(&mutex, NULL);
     return 0;
 }
