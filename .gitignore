@@ -7,3 +7,4 @@ bankersalgo_old.c
 file-copy.txt
 src/file-copy/copiedfile.txt
 src/file-copy/filetocopy.txt
+*.class
