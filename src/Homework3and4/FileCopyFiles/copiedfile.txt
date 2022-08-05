@@ -1,3 +1,0 @@
-Hi This is the file that is supposed to be copied
-Collin Funk
-CS 149
