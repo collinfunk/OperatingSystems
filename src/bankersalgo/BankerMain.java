@@ -1,10 +1,13 @@
+
+
 package bankersalgo;
 
 import java.util.Scanner;
+
 import java.util.Arrays;
 
 public class BankerMain {
-    private static final int NUMBER_OF_CUSTOMERS = 5;
+    private static final int NUMBER_OF_CUSTOMERS = 3;
     private static final int NUMBER_OF_RESOURCES = 4; // m - number of resources
 
     private int avaliable[] = new int[NUMBER_OF_RESOURCES];
@@ -15,12 +18,15 @@ public class BankerMain {
     private Scanner scanner = new Scanner(System.in);
     private static BankerMain banker = new BankerMain();
 
-
     public static void main(String[] args) {
         System.out.println("Welcome to the Banker's Algorithm");
+        System.out.println("You have " + NUMBER_OF_CUSTOMERS + " customers");
+        System.out.println("You have " + NUMBER_OF_RESOURCES + " resources");
+        System.out.println(
+                "You will prompted to enter the amount avaliable for each resource, maximum for each customer, and allocation for each customer");
         banker.init();
         banker.printMenu();
-        
+
     }
 
     public void init() {
@@ -30,42 +36,68 @@ public class BankerMain {
         for (int i = 0; i < NUMBER_OF_RESOURCES; i++) {
             System.out.print("Resource " + (i + 1) + ": ");
             int avaliable = scanner.nextInt();
-            if (avaliable < 0) {
-                System.out.println("Invalid input. Please enter a positive integer value.");
-                i--;
-            } else {
-                this.avaliable[i] = avaliable;
+            while (avaliable < 0) {
+                System.out.println("Please enter a positive value");
+                avaliable = scanner.nextInt();
             }
+            this.avaliable[i] = avaliable;
         }
         System.out.println("\n");
 
-        // Initialize the maximum resources with random values
-        System.out.println("Setting up the maximum resources...");
+        // Initialize the allocation for each customer
+        System.out.println("Enter the allocation for each customer: ");
         for (int i = 0; i < NUMBER_OF_CUSTOMERS; i++) {
+            System.out.print("Customer " + (i + 1) + ": ");
             for (int j = 0; j < NUMBER_OF_RESOURCES; j++) {
-                maximum[i][j] = (int) (Math.random() * 10);
+                int allocation = scanner.nextInt();
+                if (allocation < 0) {
+                    System.out.println("Invalid input. Please enter a positive integer value.");
+                    i--;
+                    j--;
+                } else {
+                    this.allocation[i][j] = allocation;
+                }
             }
         }
-        System.out.println("Maximum resources: ");
-        print2D(maximum);
-
-        // Initialize the allocation matrix with random values
-        System.out.println("Setting up the allocation matrix...");
-        for (int i = 0; i < NUMBER_OF_CUSTOMERS; i++) {
-            for (int j = 0; j < NUMBER_OF_RESOURCES; j++) {
-                allocation[i][j] = (int) (Math.random() * 10);
-            }
-        }
+        System.out.println("\n");
         System.out.println("Allocation matrix: ");
         print2D(allocation);
-        
+
+        // Initialize the maximum resources for each customer
+        System.out.println("Enter the maximum resources for each customer: ");
+        for (int i = 0; i < NUMBER_OF_CUSTOMERS; i++) {
+            System.out.print("Customer " + (i + 1) + ": ");
+            for (int j = 0; j < NUMBER_OF_RESOURCES; j++) {
+                int maximum = scanner.nextInt();
+                if (maximum < 0) {
+                    System.out.println("Invalid input. Please enter a positive integer value.");
+                    i--;
+                    j--;
+                } else {
+                    this.maximum[i][j] = maximum;
+                }
+            }
+        }
+
+        System.out.println("\nMaximum resources: ");
+        print2D(maximum);
 
         // Initialize the need matrix
         System.out.println("Setting up the need matrix...");
         calc_need();
+        System.out.println("Need matrix: ");
         print2D(need);
+
+        // Check if the system is in a safe state
+        System.out.println("Checking if the system is in a safe state...");
+        if (safteyCheck() == 0) {
+            System.out.println("The system is in a safe state");
+        } 
+        else {
+            System.out.println("The system is not in a safe state");
+        }
     }
-    
+
     private void calc_need() {
         for (int i = 0; i < NUMBER_OF_CUSTOMERS; i++) {
             for (int j = 0; j < NUMBER_OF_RESOURCES; j++) {
@@ -74,18 +106,10 @@ public class BankerMain {
         }
     }
 
-    public void release_resources(int customer_num, int release[]) {
-        for (int i = 0; i < NUMBER_OF_RESOURCES; i++) {
-            avaliable[i] += release[i];
-            allocation[customer_num][i] -= release[i];
-            need[customer_num][i] += release[i];
-        }
-    }
-
-     public void show_allocation() {
+    public void show_allocation() {
         System.out.println("Allocation: ");
         print2D(allocation);
-        
+
     }
 
     public void show_need() {
@@ -96,8 +120,9 @@ public class BankerMain {
 
     public void show_avaliable() {
         System.out.println("Avaliable: ");
-        System.out.println(Arrays.toString(avaliable) + "\n\n");
+        System.out.println(Arrays.toString(avaliable) + "\n");
     }
+    
 
     public void show_maximum() {
         System.out.println("Maximum: ");
@@ -115,7 +140,11 @@ public class BankerMain {
             System.out.println();
         }
         System.out.println();
-        System.out.println("\n\n");
+        System.out.println("\n");
+    }
+
+    private void clearScreen() {
+        System.out.print("\n");
     }
 
     public void show_all() {
@@ -125,48 +154,16 @@ public class BankerMain {
         show_maximum();
     }
 
-    public int safteyCheck() {
-        boolean finish[] = new boolean[NUMBER_OF_CUSTOMERS];
-
-        for (int i = 0; i < NUMBER_OF_CUSTOMERS; i++) {
-            for (int j = 0; j < NUMBER_OF_CUSTOMERS; j++) {
-                if (!finish[j]) {
-                    boolean temp = true;
-                    for (int k = 0; k < NUMBER_OF_RESOURCES; k++) {
-                        if (need[j][k] > avaliable[k]) {
-                            temp = false;
-                        }
-                    }
-
-                    if (temp) {
-                        finish[j] = true;
-                        for (int k = 0; k < NUMBER_OF_CUSTOMERS; k++) {
-                            avaliable[k] += allocation[j][k];
-                        }
-                    }
-
-                }
-            }
-
-        }
-        // if finish array is all true, then the system is in a safe state
-        for (int i = 0; i < NUMBER_OF_CUSTOMERS; i++) {
-            if (!finish[i]) {
-                return 1;
-            }
-        }
-        return 0;
-    }
 
     private void printMenu() {
+        System.out.println("\n");
         System.out.println("1. Request Resources");
-        System.out.println("2. Release Resources");
-        System.out.println("3. Show Allocation");
-        System.out.println("4. Show Need");
-        System.out.println("5. Show Available");
-        System.out.println("6. Show Max");
-        System.out.println("7. Show All");
-        System.out.println("8. Exit");
+        System.out.println("2. Show Allocation");
+        System.out.println("3. Show Need");
+        System.out.println("4. Show Available");
+        System.out.println("5. Show Max");
+        System.out.println("6. Show All");
+        System.out.println("7. Exit");
         takeInput();
     }
 
@@ -178,24 +175,21 @@ public class BankerMain {
                 requestResources_prompt();
                 break;
             case 2:
-                releaseResources();
-                break;
-            case 3:
                 show_allocation();
                 break;
-            case 4:
+            case 3:
                 show_need();
                 break;
-            case 5:
+            case 4:
                 show_avaliable();
                 break;
-            case 6:
+            case 5:
                 show_maximum();
                 break;
-            case 7:
+            case 6:
                 show_all();
                 break;
-            case 8:
+            case 7:
                 System.exit(0);
                 break;
             default:
@@ -209,27 +203,25 @@ public class BankerMain {
     private void requestResources_prompt() {
         int customerNum;
         System.out.print("Enter the customer number: ");
-        // Input Validation
-        while (!scanner.hasNextInt()) {
-            System.out.print("Invalid input. Enter the customer number: ");
-            scanner.next();
+        
+        while (!scanner.hasNextInt() || (customerNum = scanner.nextInt()) < 1 || customerNum > NUMBER_OF_CUSTOMERS) {
+            System.out.print(
+                    "Invalid input. Please enter a positive integer value between 1 and " + NUMBER_OF_CUSTOMERS + ": ");
+            scanner.nextLine();
         }
-        customerNum = scanner.nextInt();
 
-        System.out.print("Enter the request resources: ");
         int request[] = new int[NUMBER_OF_RESOURCES];
 
-        // Input Validation
+        // Input Validation loop, integer input, and range check
         for (int i = 0; i < NUMBER_OF_RESOURCES; i++) {
-            System.out.print("Enter the request resources for resource " + (i + 1) + ": ");
-            while (!scanner.hasNextInt()) {
-                System.out.print("Invalid input. Enter the request resources: ");
-                scanner.next();
+            System.out.print("Enter the amount of resource " + (i + 1) + ": ");
+            while (!scanner.hasNextInt() || (request[i] = scanner.nextInt()) < 0) {
+                System.out.print("Invalid input. Please enter a positive integer value: ");
+                scanner.nextLine();
             }
-            request[i] = scanner.nextInt();
         }
-
         clearScreen();
+        // print resquests length for debugging
         int result = request_resources(customerNum, request);
         if (result == -1) {
             System.out.println("Requested resources are not available");
@@ -238,64 +230,105 @@ public class BankerMain {
         }
 
     }
+    
 
-    private void releaseResources() {
-        int customerNum = 0;
-        System.out.print("Enter the customer number: ");
-
-        // Input Validation
-        while (!scanner.hasNextInt()) {
-            System.out.print("Invalid input. Enter the customer number: ");
-            scanner.next();
-        }
-        customerNum = scanner.nextInt();
-
-        int release[] = new int[NUMBER_OF_RESOURCES];
-
-        // Input Validation
-        for (int i = 0; i < NUMBER_OF_RESOURCES; i++) {
-            System.out.print("Enter the release resources for resource " + (i + 1) + ": ");
-            while (!scanner.hasNextInt()) {
-                System.out.print("Invalid input. Enter the release resources: ");
-                scanner.next();
-            }
-            release[i] = scanner.nextInt();
-        }
-        release_resources(customerNum, release);
-        clearScreen();
-        System.out.print("Resources are released");
-
-    }
-
+    // Function to request resources from the system, checks if the request is safe or not, returns values to original state if not safe
     public int request_resources(int customer_num, int request[]) {
         System.out.println("Customer " + customer_num + " requests: " + Arrays.toString(request));
         for (int i = 0; i < NUMBER_OF_RESOURCES; i++) {
-            avaliable[i] -= request[i];
-            allocation[customer_num][i] += request[i];
-            need[customer_num][i] -= request[i];
-        }
-        int result = safteyCheck();
+            // if requests less than equal to need, continue
+            if (request[i] <= need[customer_num][i]) {
+                // if request is less than avaliable, continue
+                if (request[i] <= avaliable[i]) {
+                    continue;
 
-        // if system is in a safe state, then update the avaliable array
-        if (result == 1) {
-            return 0;
-        }
-        // if system is not in a safe state, then rollback the changes
-        else {
-            for (int i = 0; i < NUMBER_OF_RESOURCES; i++) {
-                avaliable[i] += request[i];
-                allocation[customer_num][i] -= request[i];
-                need[customer_num][i] += request[i];
+                } else {
+                    // if request is greater than avaliable, return -1
+                    System.out.println("Requested resources are not available");
+                    return -1;
+                }
+
+            } else {
+                // if request is greater than need, return -1
+                System.out.println("Request is greater than need");
+                return -1;
             }
+        }
+        chng_resources(customer_num, request, -1);
+        if (safteyCheck() == 0) {
+            return 0;
+        } else {
+            chng_resources(customer_num, request, 1);
+            System.out.println("Requested resources are not available, deadlock detected");
             return -1;
         }
+
     }
 
 
-    private void clearScreen() {
-        System.out.print("\n\n");
+    // realease function
+    public void release_resources(int customer_num, int release[]) {
+        chng_resources(customer_num, release, 1);
     }
     
+    public void chng_resources(int customer_num, int request[], int change) {
+        chng_add(avaliable, request, change);
+        chng_add(allocation[customer_num], request, -change);
+        chng_add(need[customer_num], request, change);
+    }
+    
+    public void chng_add(int[] array, int request[], int change) {
+        for (int i = 0; i < NUMBER_OF_RESOURCES; i++) {
+            array[i] += request[i] * change;
+        }
+    }
+    
+    public void chng_add(int customer_num, int request[], int change) {
+        chng_add(allocation[customer_num], request, -change);
+        chng_add(need[customer_num], request, change);
+    }
+
+
+     // returns 0 if the system is in a safe state, 1 otherwise
+     public int safteyCheck() {
+         boolean finish[] = new boolean[NUMBER_OF_CUSTOMERS];
+         int work[] = new int[NUMBER_OF_RESOURCES];
+
+         // initalize work to avaliable
+         for (int i = 0; i < NUMBER_OF_RESOURCES; i++) {
+             work[i] = avaliable[i];
+         }
+         // initialize finish to false
+         for (int i = 0; i < NUMBER_OF_CUSTOMERS; i++) {
+             finish[i] = false;
+
+             // check if the system is in a safe state
+             for (int j = 0; j < NUMBER_OF_CUSTOMERS; j++) { // for each customer
+                 if (!finish[j]) { // if the customer is not finished
+                     boolean temp = true; // condition to check if the customer is in a safe state
+                     for (int k = 0; k < NUMBER_OF_RESOURCES; k++) { // check resources
+                         // if the customer needs more than the work, the system is not in a safe state
+                         if (need[j][k] > work[k]) {
+                             temp = false;
+                         }
+                     }
+                     // if the customer is in a safe state, mark the customer as finished
+                     if (temp) {
+                         for (int k = 0; k < NUMBER_OF_RESOURCES; k++) {
+                             work[k] += allocation[j][k];
+                         }
+                         finish[j] = true; // the customer is finished
+                     }
+                 }
+             }
+
+         }
+         // if finish array is all true, then the system is in a safe state
+         for (int i = 0; i < NUMBER_OF_CUSTOMERS; i++) {
+             if (!finish[i]) {
+                 return -1;
+             }
+         }
+         return 0;
+    }
 }
-
-
